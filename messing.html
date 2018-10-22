@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body {background-color: #3B3F41}
+        svg {margin: 80pt 0 0 80pt;}
+        p {margin: 0 0 0 80pt; color: azure}
+    </style>
+</head>
+<script type="text/javascript">
+    function draw(data) {
+        let chart_height = 300;
+        let chart_width = 485;
+        let boundry = 80;
+
+        var x_range = d3.scaleLinear()
+            .domain([0,data.length])
+            .range([boundry, chart_width + boundry]);
+
+        let max_value = d3.max(data, function(d) { return parseInt(d.IT_solar_generation); });
+        var y_range = d3.scaleLinear()
+            .domain([0, max_value])
+            .range([chart_height + boundry, boundry]);
+
+
+        var svg = d3.select(".overall_chart");
+
+        svg.append('text').attr('x', boundry-4).attr('y', boundry-4).attr('text-anchor','end').attr('fill', 'azure').text(max_value + ' MW');
+        svg.append('text').attr('x', boundry-4).attr('y', boundry+chart_height+4).attr('text-anchor','end').attr('fill', 'azure').text('0 MW');
+
+
+        svg.attr("width", chart_width + boundry * 2)
+            .attr("height", chart_height + boundry * 2);
+
+        svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append('g')
+            .append('circle')
+            .attr('r', 2)
+            .attr('cy', function (data) {
+                return y_range(parseInt(data.IT_solar_generation));
+            })
+            .attr('cx', function (d, i) {
+                return x_range(i);
+            })
+            .attr('opacity', 0.2);
+
+        svg.append('text').attr('x', chart_width/2 + boundry).attr('y', chart_height+boundry + 20).attr('text-anchor','middle').attr('fill', 'azure').text('one year');
+        svg.append('text').attr('x', boundry-5).attr('y', chart_height/2+boundry).attr('text-anchor','end').attr('fill', 'azure').text('power');
+    }
+
+
+    d3.csv('TimeSeries_TotalSolarGen_and_Load_IT_2015.csv')
+        .then(function (data) {
+            draw(data)
+        });
+
+    d3.csv('alt_az_pwr.csv').then(function (data) {
+        let chart_height = 700;
+        let chart_width = 1400;
+        let sun_size = 0.53; // degrees
+        let boundary = 20;
+        function arc (x) {
+            let ARC_HEIGHT = chart_height*0.2;
+            let R = (Math.pow(chart_width/2, 2) + Math.pow(ARC_HEIGHT, 2))/ (2 * ARC_HEIGHT);
+            return - (Math.sqrt(Math.pow(R, 2) - Math.pow(x - chart_width/2, 2)) + ARC_HEIGHT - R)
+        }
+
+        var x_range = d3.scaleLinear()
+            .domain([0,360])
+            .range([boundary, chart_width + boundary]);
+
+        var y_range = d3.scaleLinear()
+            .domain([-90, 90])
+            .range([chart_height + boundary, boundary]);
+
+        let max_value = d3.max(data, function(d) { return parseInt(d.power); });
+
+        var power_scale = d3.scaleLinear()
+            .domain([0, max_value])
+            .range([0, 0.2]);
+
+        var color_scale = d3.scaleLinear()
+            .domain([0, max_value])
+            .range(['#af6900','#FFFFFF']);
+
+        var svg = d3.select('.second_chart');
+        svg.attr("width", chart_width + boundary * 3)
+            .attr("height", chart_height + boundary * 3);
+
+        svg.append('line').attr('stroke', '#272821')
+            .attr('x1', x_range(0))
+            .attr('x2', x_range(360))
+            .attr('y1', y_range(0))
+            .attr('y2', y_range(0))
+            .attr('stroke-width', '2px');
+
+        svg.selectAll('g').data(data).enter().append('g').append('circle')
+            .attr('r', sun_size*(chart_height/30))
+            .attr('cy', function (data) {
+                return arc(data.azimuth) + y_range(parseInt(data.altitude));
+            })
+            .attr('cx', function (data) {
+                return x_range(parseInt(data.azimuth));
+            })
+            .attr('opacity', function (data) {
+                return power_scale(parseInt(data.power));
+            })
+            .attr('fill', function (data) {
+                return color_scale(parseInt(data.power));
+            });
+
+        var directions = [[0, 'north'], [0.25, 'east'], [0.5, 'south'], [0.75, 'west'], [1, 'north']];
+
+        directions.forEach(d => {
+            svg.append('text')
+                .attr('x', boundary + chart_width * d[0])
+                .attr('y', boundary + chart_height / 2 + 5)
+                .attr('text-anchor','center')
+                .attr('fill', 'azure').text(d[1]);
+        });
+    })
+
+</script>
+
+<body>
+<svg class="overall_chart"></svg>
+<p> All the times of day are shown. This is non-ideal. Need to separate the concept of days from hours.</p>
+<svg class="second_chart"> </svg>
+<p>Needs interpolation between points. The large sample period (1 hour) is dominating the visual.</p>
+<p>The time zone is questionable when looking at the left right symmetry of the graphic.</p>
+<p>Data Source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>
+</body>
+</html>
