@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body {background-color: #3B3F41}
+        svg {display: block; margin: auto}
+        p {margin: 0 0 0 80pt; color: azure}
+        line {stroke-width: 1; stroke: #ffffff}
+    </style>
+</head>
+<script type="text/javascript">
+    Number.prototype.pad = function(size) {
+        var s = String(this);
+        while (s.length < (size || 2)) {s = "0" + s;}
+        return s;
+    };
+
+    function draw(data) {
+        let chart_height = 500;
+        let chart_width = 1460;
+        let line_space = chart_width / data.length;
+        let boundry = 40;
+
+        var x_range = d3.scaleLinear()
+            .domain([0,data.length/24])
+            .range([boundry, chart_width + boundry]);
+
+        let max_value = d3.max(data, function(d) { return parseInt(d.IT_solar_generation); });
+        var y_range = d3.scaleLinear()
+            .domain([24, 0])
+            .range([chart_height + boundry, boundry]);
+        
+        var contrast_scale = d3.scaleLinear()
+            .domain([1, max_value])
+            .range([0, 1.0]);
+
+        var svg = d3.select(".overall_chart");
+
+        svg.select('rect')
+            .attr('height', chart_height + 24)
+            .attr('width', chart_width + boundry)
+            .attr('x', 0)
+            .attr('y', boundry);
+
+        svg.attr("width", chart_width + boundry)
+            .attr("height", chart_height + boundry * 2);
+
+        svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append('g')
+            .append('line')
+            .attr('y1', function (data) {
+                return y_range(parseInt(data.utc_timestamp.substr(11,2)));
+            })
+            .attr('y2', function (data) {
+                return y_range(parseInt(data.utc_timestamp.substr(11,2))+1);
+            })
+            .attr('x1', function (data, i) {
+                let col = Math.floor(i / 24);
+                return x_range(col);
+            })
+            .attr('x2', function (data, i) {
+                let col = Math.floor(i / 24);
+                return x_range(col);
+            })
+            .attr('opacity', function (data) {return contrast_scale(parseInt(data.IT_solar_generation) + 1)});
+
+        svg.append('text').attr('x', chart_width-155).attr('y', boundry + 16).attr('text-anchor','right').attr('fill', 'azure').text('Italian Solar Production 2015');
+
+        for (const x of Array(24).keys()) {
+            svg.append('text').attr('x', 4).attr('y', y_range(x) + 16).attr('text-anchor','left').attr('fill', 'azure').text(x.pad(2) + ':00');
+        }
+
+        ['January', 'Feburary', 'March', 'April', 'May', 'June', 'July',
+            'August', 'September', 'October', 'November', 'December'].map(function(element, index)
+        {
+            svg.append('text').attr('x', 4 + (index + 0.5) * chart_width / 12).attr('y', chart_height + boundry + 16).attr('text-anchor','center').attr('fill', 'azure').text(element);
+        });
+    }
+    d3.csv('TimeSeries_TotalSolarGen_and_Load_IT_2015.csv')
+        .then(function (data) {
+            draw(data)
+        });
+</script>
+
+<body>
+<svg class="overall_chart">
+    <rect id="Rectangle" rx="8"></rect>
+</svg>
+<p>source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>
+</body>
+</html>
