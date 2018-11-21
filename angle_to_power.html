@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body {background-color: #3B3F41}
+        svg {margin: 80pt 0 0 80pt;}
+        p {margin: 0 0 0 80pt; color: azure}
+    </style>
+</head>
+<script type="text/javascript">
+    d3.csv('alt_az_pwr.csv').then(function (data) {
+        let chart_height = 700;
+        let chart_width = 1400;
+        let boundary = 20;
+
+        let max_value = d3.max(data, function(d) { return parseInt(d.power); });
+
+        let max_angle = d3.max(data, function (d) { return parseInt(d.altitude); });
+
+        let min_angle = d3.min(data, function (d) { return parseInt(d.altitude)});
+
+        var x_range = d3.scaleLinear()
+            .domain([min_angle, max_angle])
+            .range([boundary, chart_width + boundary]);
+
+        var y_range = d3.scaleLinear()
+            .domain([0, max_value])
+            .range([chart_height, 0]);
+
+        var svg = d3.select('.chart');
+        svg.attr("width", chart_width + boundary * 2)
+            .attr("height", chart_height + boundary * 2);
+
+        svg.selectAll('g').data(data).enter().append('g').append('circle')
+            .attr('r', 2)
+            .attr('cy', function (data) {
+                return y_range(parseInt(data.power));
+            })
+            .attr('cx', function (data) {
+                return x_range(parseInt(data.altitude));
+            }).attr('fill', 'azure');
+
+        [...Array(+((max_angle - min_angle)/10)).keys()].forEach(d => {
+            svg.append('text')
+                .attr('x', x_range(10 * d + min_angle))
+                .attr('y', boundary + chart_height + 5)
+                .attr('text-anchor','center')
+                .attr('fill', 'azure')
+                .text( 10* d + min_angle + '°');
+        });
+
+        [...Array(10).keys()].forEach(d => {
+            svg.append('text')
+                .attr('x', 0)
+                .attr('y', y_range(Math.round((d/10)*max_value/100)*100))
+                .attr('text-anchor','center')
+                .attr('fill', 'azure')
+                .text(Math.round((d/10)*max_value/100)*100);
+        });
+    })
+</script>
+
+<body>
+<svg class="chart"> </svg>
+<p>Data Source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>
+</body>
+</html>
