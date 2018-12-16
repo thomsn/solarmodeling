@@ -20,7 +20,6 @@
     function draw(data) {
         let chart_height = 500;
         let chart_width = 1460;
-        let line_space = chart_width / data.length;
         let boundry = 40;
 
         var x_range = d3.scaleLinear()
@@ -47,7 +46,12 @@
         svg.attr("width", chart_width + boundry)
             .attr("height", chart_height + boundry * 2);
 
-        svg.selectAll("g")
+        var tooltip_text = svg.select(".tooltip_text");
+
+
+        var small_lines = svg.append('g');
+
+        small_lines.selectAll("g")
             .data(data)
             .enter()
             .append('g')
@@ -66,7 +70,51 @@
                 let col = Math.floor(i / 24);
                 return x_range(col);
             })
-            .attr('opacity', function (data) {return contrast_scale(parseInt(data.IT_solar_generation) + 1)});
+            .attr('opacity', function (data) {return contrast_scale(parseInt(data.IT_solar_generation) + 1)})
+            .on("mouseover", function(d) {
+                tooltip_box.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip_text.text(d.utc_timestamp +' '+ d.IT_solar_generation);
+            });
+
+        var line_hitboxes = svg.append('g');
+
+        line_hitboxes.selectAll("g")
+            .data(data)
+            .enter()
+            .append('line')
+            .attr('y1', function (data) {
+                return y_range(parseInt(data.utc_timestamp.substr(11,2)));
+            })
+            .attr('y2', function (data) {
+                return y_range(parseInt(data.utc_timestamp.substr(11,2))+1);
+            })
+            .attr('x1', function (data, i) {
+                let col = Math.floor(i / 24);
+                return x_range(col);
+            })
+            .attr('x2', function (data, i) {
+                let col = Math.floor(i / 24);
+                return x_range(col);
+            })
+            .style('stroke-width', 4)
+            .style('stroke', 'red')
+            .attr('opacity', 0)
+            .on("mouseover", function(d) {
+                line = d3.select(this);
+                line.style('opacity', 1.0);
+                tooltip_text.text(d.utc_timestamp +' '+ d.IT_solar_generation + ' MW');
+                tooltip_text.transition().duration(200).style('opacity', 1.0);
+            })
+            .on("mouseout", function(d) {
+                line = d3.select(this);
+                line.style('opacity', 0.0);
+                tooltip_text.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+
+            });
 
         svg.append('text').attr('x', chart_width-155).attr('y', boundry + 16).attr('text-anchor','right').attr('fill', 'azure').text('Italian Solar Production 2015');
 
@@ -89,6 +137,9 @@
 <body>
 <svg class="overall_chart">
     <rect id="Rectangle" rx="8"></rect>
+
+    <text class="tooltip_text" x="650" y="55" fill="red" style="opacity: 0">stuff in here</text>
+
 </svg>
 <p>source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>
 </body>
