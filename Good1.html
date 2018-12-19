@@ -99,7 +99,7 @@
                 return x_range(col);
             })
             .style('stroke-width', 4)
-            .style('stroke', 'red')
+            .style('stroke', 'green')
             .attr('opacity', 0)
             .on("mouseover", function(d) {
                 line = d3.select(this);
@@ -138,7 +138,7 @@
 <svg class="overall_chart">
     <rect id="Rectangle" rx="8"></rect>
 
-    <text class="tooltip_text" x="650" y="55" fill="red" style="opacity: 0">stuff in here</text>
+    <text class="tooltip_text" x="650" y="55" fill="green" style="opacity: 0">stuff in here</text>
 
 </svg>
 <p>source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>

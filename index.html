@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<style>
+    body {background-color: #000000}
+    svg {display: block; margin: auto}
+    p {margin: 0 0 0 80pt; color: azure}
+</style>
+<body>
+<p>Introduce the reader to solar power, Italy, Italian solar, the incentive programs, the dataset, the sampling
+method</p>
+<svg class="histogram">
+    <rect rx="8" fill="#121212"></rect>
+    <text class="tooltip_text" x="650" y="55" fill="green" style="opacity: 0"></text>
+</svg>
+
+<p>
+    Describe the visual encodings.
+    Describe the interaction.
+    Present some observations to the reader like: POSITIVE SPACE AND NEGATIVE SPACE
+
+    power during the day not the night
+    the span of power is greater in the summer months,
+    less in the winter months,
+    power drops out sometimes in the winter (mention the temperature in italy)
+    Power is super consistent in june and july
+    Power is morning learning
+    Outlier 0 stripes
+
+    Introduce the reader to planetary dynamics, seasons, daily weather</p>
+<svg class="scatter">
+    <rect rx="8" fill="#121212"></rect>
+    <text class="tooltip_text" x="650" y="55" fill="green" style="opacity: 0"></text>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Mac-Background" transform="translate(1350, 550)">
+            <rect id="Rectangle" fill="#FF8A3D" x="0" y="117" width="32" height="20" opacity="0.3"></rect>
+            <rect id="Rectangle" fill="#3D88FF" x="0" y="64" width="32" height="20" opacity="0.3"></rect>
+            <text id="Morning">
+                <tspan x="40" y="81" fill="azure" opacity="0.3">Morning</tspan>
+            </text>
+            <text id="Evening">
+                <tspan x="40" y="134" fill="azure" opacity="0.3">Evening</tspan>
+            </text>
+            <rect id="Rectangle" fill="#FFFFFF" x="0" y="91" width="32" height="20" opacity="0.3"></rect>
+            <text id="Noon">
+                <tspan x="40" y="108" fill="azure" opacity="0.3">Noon</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
+<p>
+    Describe the visual encodings.
+    Describe the interaction.
+
+    Present some observations to the reader like: POSITIVE SPACE AND NEGATIVE SPACE
+    the linearity of power with respect to altitude,
+    the plateau of power with respect to altitude,
+    the tendancy of no power when the sun is below the horizon,
+    the consistency of high power when the sun is high in the sky,
+    the tendancy of the morning to have greater power,
+    the underground-high-power outliers,
+    the super high power outliers,
+
+    Describe design decisions:
+    show all the data including outliers and the night
+    avoid busy lines
+    dark themed because I wanted the solar data to be bright
+    no averages or loss of information. I want the user to calculate their own average with their eyes.
+    big charts designed for a large display. I wanted to maximize the available signal.
+    d3 used as it enabled full customization and easy plotting of 1000s of points.
+
+    Introduce the reader to tufte, D3 guy, dataset guy for their work
+</p>
+</body>
+</html>
+
+<script type="module">
+    import {create_histogram} from './heatmap_graphic/heatmap_graphic.mjs';
+    d3.csv('TimeSeries_TotalSolarGen_and_Load_IT_2015.csv').then(function (data) {
+        create_histogram(d3, d3.select(".histogram"), data);
+    });
+
+    import {create_angle_scatter} from "./angle_scatter/angle_scatter.mjs";
+    d3.csv('alt_az_pwr.csv').then(function (data) {
+        create_angle_scatter(d3, d3.select(".scatter"), data)
+    });
+</script>
+

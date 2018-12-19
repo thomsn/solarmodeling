@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body {background-color: #3B3F41}
+        svg {margin: 80pt 0 0 80pt;}
+        p {margin: 0 0 0 80pt; color: azure}
+        path.line {fill: none; stroke-width: 2px; stroke: azure}
+    </style>
+</head>
+<script type="text/javascript">
+    d3.json('solar.json').then(function (data) {
+
+        let chart_height = 700;
+        let chart_width = 1400;
+        let boundary = 20;
+
+        var svg = d3.select('.chart');
+        svg.attr("width", chart_width + boundary * 3)
+            .attr("height", chart_height + boundary * 3);
+
+        var x_range = d3.scaleLinear()
+            .domain([0,360])
+            .range([boundary, chart_width + boundary]);
+
+        var y_range = d3.scaleLinear()
+            .domain([-90, 90])
+            .range([chart_height + boundary, boundary]);
+
+        var directions = [[0, 'north'], [0.25, 'east'], [0.5, 'south'], [0.75, 'west'], [1, 'north']];
+
+        directions.forEach(d => {
+            svg.append('text')
+                .attr('x', boundary + chart_width * d[0])
+                .attr('y', boundary + chart_height / 2 + 5)
+                .attr('text-anchor','center')
+                .attr('fill', 'azure').text(d[1]);
+        });
+
+        d3.select('.chart').selectAll('path').data(data).enter().append('path')
+            .attr('class', 'line')
+            .attr('d', function (d) {
+                return d3.line()
+                    .x(function (d) {return x_range(d.azimuth);})
+                    .y(function (d) {return y_range(d.altitude);})
+                    .curve(d3.curveMonotoneX)(d);
+        });
+    })
+
+</script>
+
+<body>
+<svg class="chart"> </svg>
+<p>Data Source: https://www.kaggle.com/arielcedola/solar-generation-and-demand-italy-20152016</p>
+
+<svg width="574px" height="153px" viewBox="0 0 574 153" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="48.4490404%" y1="-30.960335%" x2="48.4490404%" y2="122.336659%" id="linearGradient-1">
+            <stop stop-color="#E7DBFF" offset="0%"></stop>
+            <stop stop-color="#C7BB6A" offset="50.2348266%"></stop>
+            <stop stop-color="#922E00" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.647716704" stroke-linejoin="round">
+        <g id="Mac-Background-Copy" transform="translate(-1394.000000, -1194.000000)" stroke="url(#linearGradient-1)" stroke-width="3">
+            <path d="M1396,1346 C1456.08105,1246 1551.2007,1196 1681.35894,1196 C1811.51719,1196 1906.63683,1246 1966.71789,1346" id="Path"></path>
+        </g>
+    </g>
+</svg>
+</body>
+</html>
