@@ -51,7 +51,7 @@ export function create_angle_scatter(d3, svg, data) {
         .on("mouseover", function(d) {
             var dot = d3.select(this);
             dot.attr('r', 8);
-            tooltip_text.text('Sun Altitude/Azimuth ' + Math.floor(d.altitude) +'°/' + Math.floor(d.azimuth) + '° Power '+ parseInt(d.power) + ' MW');
+            tooltip_text.text('Sun Altitude ' + Math.floor(d.altitude) +'° Azimuth' + Math.floor(d.azimuth) + '° Power '+ parseInt(d.power) + ' MW');
             tooltip_text.transition().duration(200).style('opacity', 1.0);
         })
         .on("mouseout", function(d) {
